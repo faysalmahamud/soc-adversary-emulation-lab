@@ -1,0 +1,40 @@
+﻿TOTAL SYSMON EVENTS
+index=main sourcetype="XmlWinEventLog:Microsoft-Windows-Sysmon/Operational"
+| stats count AS "Total Sysmon Events"
+
+LATEST EVENT BY HOST
+index=main sourcetype="XmlWinEventLog:Microsoft-Windows-Sysmon/Operational"
+| stats count latest(_time) AS latest_event BY host
+| convert ctime(latest_event)
+| rename latest_event AS "Latest Event"
+
+SYSMON EVENT DISTRIBUTION
+index=main sourcetype="XmlWinEventLog:Microsoft-Windows-Sysmon/Operational"
+| stats count BY EventCode
+| sort - count
+
+RECENT PROCESS CREATIONS
+index=main sourcetype="XmlWinEventLog:Microsoft-Windows-Sysmon/Operational"
+EventCode=1
+| table _time host User Image CommandLine ParentImage
+| sort - _time
+| head 20
+
+REQUIRED-TECHNIQUE INDICATORS
+index=main sourcetype="XmlWinEventLog:Microsoft-Windows-Sysmon/Operational"
+(
+  (EventCode=1 (Image="*\\schtasks.exe" OR Image="*\\mshta.exe" OR Image="*\\powershell.exe" OR Image="*\\pwsh.exe"))
+  OR (EventCode=10 TargetImage="*\\lsass.exe")
+  OR (EventCode=13 TargetObject="*\\Microsoft\\Windows Defender*")
+)
+| eval technique=case(
+    EventCode=10, "T1003.001 LSASS access",
+    EventCode=13, "T1112 Defender registry",
+    like(lower(Image), "%\\schtasks.exe"), "T1053.005 Scheduled task",
+    like(lower(Image), "%\\mshta.exe"), "T1218.005 Mshta",
+    like(lower(Image), "%\\powershell.exe") OR like(lower(Image), "%\\pwsh.exe"), "T1059.001 PowerShell",
+    true(), "Review"
+  )
+| eval evidence=coalesce(CommandLine, TargetObject, TargetImage)
+| table _time host technique Image evidence User
+| sort - _time

@@ -1,0 +1,5 @@
+﻿index=main sourcetype="XmlWinEventLog:Microsoft-Windows-Sysmon/Operational"
+EventCode=10 TargetImage="*\\lsass.exe"
+| where NOT match(lower(SourceImage), "(?i)\\\\windows\\\\system32\\\\(csrss|wininit|services|svchost|wmiprvse)\\.exe$")
+| table _time host User SourceImage TargetImage GrantedAccess CallTrace SourceProcessId
+| sort - _time

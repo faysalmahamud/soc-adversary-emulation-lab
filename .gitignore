@@ -1,0 +1,14 @@
+# Local lab artifacts
+*.dmp
+*.dump
+*.kirbi
+*.key
+*.pem
+*.pfx
+
+# Local/editor files
+.DS_Store
+Thumbs.db
+.vscode/
+*.tmp
+*.log

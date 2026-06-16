@@ -1,0 +1,7 @@
+[tcpout]
+defaultGroup = assignment_indexer
+
+[tcpout:assignment_indexer]
+server = 192.168.150.132:9997
+
+[tcpout-server://192.168.150.132:9997]

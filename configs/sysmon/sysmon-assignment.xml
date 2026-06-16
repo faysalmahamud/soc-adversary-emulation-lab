@@ -1,0 +1,30 @@
+<Sysmon schemaversion="4.90">
+  <HashAlgorithms>SHA256</HashAlgorithms>
+  <CheckRevocation />
+  <EventFiltering>
+    <!-- Log all process creation events for process and command-line evidence. -->
+    <ProcessCreate onmatch="exclude" />
+
+    <!-- Limit network telemetry to the two required proxy/download behaviors. -->
+    <RuleGroup name="Assignment network activity" groupRelation="or">
+      <NetworkConnect onmatch="include">
+        <Image condition="end with">\mshta.exe</Image>
+        <Image condition="end with">\powershell.exe</Image>
+        <Image condition="end with">\pwsh.exe</Image>
+      </NetworkConnect>
+    </RuleGroup>
+
+    <!-- Focus process-access telemetry on credential-access behavior. -->
+    <ProcessAccess onmatch="include">
+      <TargetImage condition="end with">\lsass.exe</TargetImage>
+    </ProcessAccess>
+
+    <!-- Record Defender policy changes required for the registry task. -->
+    <RuleGroup name="Assignment registry activity" groupRelation="or">
+      <RegistryEvent onmatch="include">
+        <TargetObject condition="contains">\Policies\Microsoft\Windows Defender</TargetObject>
+        <TargetObject condition="contains">\Microsoft\Windows Defender</TargetObject>
+      </RegistryEvent>
+    </RuleGroup>
+  </EventFiltering>
+</Sysmon>

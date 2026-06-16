@@ -1,0 +1,5 @@
+﻿index=main sourcetype="XmlWinEventLog:Microsoft-Windows-Sysmon/Operational"
+EventCode=13 TargetObject="*\\Microsoft\\Windows Defender*"
+| where match(lower(TargetObject), "(?i)(disableantispyware|disablerealtimemonitoring|disablebehaviormonitoring|disableioavprotection)")
+| table _time host User Image TargetObject Details ProcessId
+| sort - _time

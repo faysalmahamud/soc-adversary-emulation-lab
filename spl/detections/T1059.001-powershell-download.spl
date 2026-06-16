@@ -1,0 +1,5 @@
+﻿index=main sourcetype="XmlWinEventLog:Microsoft-Windows-Sysmon/Operational"
+EventCode=1 (Image="*\\powershell.exe" OR Image="*\\pwsh.exe")
+| where match(lower(CommandLine), "(?i)(invoke-webrequest|iwr\\s|downloadstring|downloadfile|net\\.webclient|start-bitstransfer|iex\\s*\\()")
+| table _time host User Image CommandLine ParentImage ProcessId
+| sort - _time
